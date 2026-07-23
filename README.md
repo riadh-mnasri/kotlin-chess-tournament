@@ -53,30 +53,102 @@ dependencies {
 }
 ```
 
-## Utilisation rapide
+## Comment utiliser la librairie
+
+La librairie ne gère aucun état pour vous : toutes les fonctions sont pures (elles prennent des données en entrée et renvoient un résultat, sans rien modifier). C'est à votre code appelant de conserver la liste des joueurs et l'historique des rounds déjà joués, et de le repasser à chaque appel.
+
+### 1. Créer les joueurs
 
 ```kotlin
 import io.github.riadhmnasri.chesstournament.model.Player
-import io.github.riadhmnasri.chesstournament.pairing.pairFirstRound
-import io.github.riadhmnasri.chesstournament.rating.expectedScore
-import io.github.riadhmnasri.chesstournament.rating.newRating
-import io.github.riadhmnasri.chesstournament.standings.computeStandings
 
-val alice = Player(id = "1", name = "Alice", rating = 2200)
-val bob = Player(id = "2", name = "Bob", rating = 2100)
-
-// Appariement du premier tour
-val round1 = pairFirstRound(listOf(alice, bob))
-
-// Calcul Elo après une victoire des blancs
-val expected = expectedScore(alice.rating, bob.rating)
-val aliceNewRating = newRating(alice.rating, expected, actualScore = 1.0, kFactor = 20)
-
-// Classement à partir des rounds joués
-val standings = computeStandings(listOf(alice, bob), rounds = emptyList())
+val players = listOf(
+    Player(id = "1", name = "Alice", rating = 2200),
+    Player(id = "2", name = "Bob", rating = 2100),
+    Player(id = "3", name = "Charlie", rating = 2000),
+    Player(id = "4", name = "Dave", rating = 1900),
+)
 ```
 
-Pour un exemple complet qui enchaîne plusieurs tours, calcule les classements et les nouveaux ratings, voir [`examples/src/main/kotlin/.../RunSampleTournament.kt`](examples/src/main/kotlin/io/github/riadhmnasri/chesstournament/examples/RunSampleTournament.kt), exécutable avec :
+`id` doit être stable et unique par joueur : c'est ce qui permet à la librairie de reconnaître un même joueur d'un round à l'autre. `age` est optionnel, il n'est utilisé que par la règle de K-factor Elo (voir plus bas).
+
+### 2. Apparier un round
+
+Le premier round s'apparie uniquement à partir du classement des joueurs :
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.pairing.pairFirstRound
+
+val roundPairings = pairFirstRound(players)
+// roundPairings.pairings   : List<Pairing>, chaque Pairing a un `white` et un `black`
+// roundPairings.byePlayer  : Player?, non nul si le nombre de joueurs est impair
+```
+
+### 3. Jouer les parties et enregistrer le round
+
+Une fois les résultats connus (saisis par un utilisateur, générés par un moteur d'échecs, simulés...), transformez chaque `Pairing` en `Game` en lui associant un `GameOutcome`, puis regroupez-les dans un `Round` :
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.model.Game
+import io.github.riadhmnasri.chesstournament.model.GameOutcome
+import io.github.riadhmnasri.chesstournament.model.Round
+
+val games = roundPairings.pairings.map { pairing ->
+    Game(white = pairing.white, black = pairing.black, outcome = GameOutcome.WHITE_WINS) // remplacez par le vrai résultat
+}
+val round1 = Round(number = 1, games = games, byePlayer = roundPairings.byePlayer)
+```
+
+### 4. Apparier les rounds suivants
+
+À partir du round 2, il faut passer l'historique des rounds déjà joués : c'est ce qui permet à la librairie d'éviter de refaire une paire déjà jouée, de faire tourner le bye entre les joueurs, et d'équilibrer les couleurs.
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.pairing.pairNextRound
+
+val playedRounds = mutableListOf(round1)
+
+val round2Pairings = pairNextRound(players, playedRounds)
+// ... jouez les parties comme à l'étape 3, construisez un Round(number = 2, ...)
+// puis ajoutez-le à playedRounds avant d'apparier le round 3, et ainsi de suite
+```
+
+### 5. Calculer le classement
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.standings.computeStandings
+
+val standings = computeStandings(players, playedRounds)
+standings.forEach { standing ->
+    println("${standing.player.name}: ${standing.score} pts (Buchholz ${standing.buchholz}, SB ${standing.sonnebornBerger})")
+}
+```
+
+`standings` est déjà trié du meilleur au moins bon (voir [Les règles expliquées simplement](#les-règles-expliquées-simplement) pour l'ordre de tri).
+
+### 6. Calculer l'évolution du rating Elo
+
+Le résultat d'un joueur dans un `Game` s'obtient avec `game.pointsFor(player)` (1.0, 0.5 ou 0.0), qui se branche directement sur le calcul Elo :
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.rating.expectedScore
+import io.github.riadhmnasri.chesstournament.rating.kFactorFor
+import io.github.riadhmnasri.chesstournament.rating.newRating
+
+val game = round1.games.first()
+val player = game.white
+val opponent = game.opponentOf(player)!!
+
+val expected = expectedScore(player.rating, opponent.rating)
+val kFactor = kFactorFor(player.rating, player.age)
+val playerNewRating = newRating(player.rating, expected, game.pointsFor(player), kFactor)
+```
+
+Notez que les objets `Player` créés à l'étape 1 gardent volontairement leur rating de départ pendant tout le tournoi (c'est ce rating qui sert à l'appariement et à l'équilibrage des couleurs) : les nouveaux ratings calculés ici sont à stocker séparément, par exemple dans une `Map<Player, Int>`, exactement comme le fait l'exemple ci-dessous.
+
+### Exemple complet
+
+Pour voir ces six étapes enchaînées sur un tournoi de plusieurs rounds, avec l'affichage des appariements, du classement et des changements de rating, voir [`examples/src/main/kotlin/.../RunSampleTournament.kt`](examples/src/main/kotlin/io/github/riadhmnasri/chesstournament/examples/RunSampleTournament.kt), exécutable avec :
 
 ```bash
 ./gradlew :examples:run
