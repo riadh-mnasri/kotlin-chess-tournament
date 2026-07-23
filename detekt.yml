@@ -1,0 +1,12 @@
+build:
+  maxIssues: 0
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '0.5'
+      - '1'
+      - '2'
