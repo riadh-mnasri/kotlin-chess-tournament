@@ -101,6 +101,10 @@ Pour un exemple complet qui enchaîne plusieurs tours, calcule les classements e
 
 Le projet utilise [ktlint](https://github.com/pinterest/ktlint) pour le formatage, [detekt](https://detekt.dev/) pour l'analyse statique, [Kover](https://github.com/Kotlin/kotlinx-kover) pour la couverture de tests, et [Dokka](https://github.com/Kotlin/dokka) pour la documentation API. Tout le code métier a été écrit en TDD (tests d'abord).
 
+## Publication
+
+Le projet est déjà configuré pour publier sur Maven Central (plugin, POM, signature), il ne manque que la configuration ponctuelle des comptes et clés. Voir [PUBLISHING.md](PUBLISHING.md).
+
 ## Contribuer
 
 Les contributions sont bienvenues, voir [CONTRIBUTING.md](CONTRIBUTING.md) pour le guide de contribution et [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) pour les règles de la communauté. La section « Ce que la librairie ne fait pas (encore) » ci-dessus est un bon point de départ pour une première contribution.

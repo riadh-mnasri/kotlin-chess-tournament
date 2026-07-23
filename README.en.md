@@ -101,6 +101,10 @@ For a full example that plays out several rounds and computes standings and rati
 
 The project uses [ktlint](https://github.com/pinterest/ktlint) for formatting, [detekt](https://detekt.dev/) for static analysis, [Kover](https://github.com/Kotlin/kotlinx-kover) for test coverage, and [Dokka](https://github.com/Kotlin/dokka) for API documentation. All business logic was written test-first (TDD).
 
+## Publishing
+
+The project is already configured to publish to Maven Central (plugin, POM, signing); only the one-time account and key setup is missing. See [PUBLISHING.md](PUBLISHING.md).
+
 ## Contributing
 
 Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution guide and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines. The "What the library does not do (yet)" section above is a good starting point for a first contribution.
