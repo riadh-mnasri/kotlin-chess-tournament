@@ -1,7 +1,10 @@
 package io.github.riadhmnasri.chesstournament.pairing
 
+import io.github.riadhmnasri.chesstournament.model.Game
+import io.github.riadhmnasri.chesstournament.model.GameOutcome
 import io.github.riadhmnasri.chesstournament.model.Pairing
 import io.github.riadhmnasri.chesstournament.model.Player
+import io.github.riadhmnasri.chesstournament.model.Round
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -66,5 +69,58 @@ class SwissPairingEngineTest {
         // Then
         assertThat(result.byePlayer).isEqualTo(soloPlayer)
         assertThat(result.pairings).isEmpty()
+    }
+
+    @Test
+    fun `second round groups players by score and avoids repeating round 1 pairings`() {
+        // Given: round 1 already played, Alice beat Charlie and Bob beat Dave
+        val alice = Player(id = "1", name = "Alice", rating = 2400)
+        val bob = Player(id = "2", name = "Bob", rating = 2300)
+        val charlie = Player(id = "3", name = "Charlie", rating = 2200)
+        val dave = Player(id = "4", name = "Dave", rating = 2100)
+        val round1 =
+            Round(
+                number = 1,
+                games =
+                    listOf(
+                        Game(alice, charlie, GameOutcome.WHITE_WINS),
+                        Game(dave, bob, GameOutcome.BLACK_WINS),
+                    ),
+            )
+
+        // When
+        val result = pairNextRound(listOf(alice, bob, charlie, dave), listOf(round1))
+
+        // Then: the two round 1 winners (Alice, Bob) are now paired together,
+        // and the two round 1 losers (Charlie, Dave) are paired together.
+        // Bob had black in round 1 so he gets white now; Charlie had black
+        // in round 1 so he gets white now too.
+        assertThat(result.byePlayer).isNull()
+        assertThat(result.pairings).containsExactlyInAnyOrder(
+            Pairing(white = bob, black = alice),
+            Pairing(white = charlie, black = dave),
+        )
+    }
+
+    @Test
+    fun `the bye rotates to a player who has not already had one`() {
+        // Given: 3 players, Charlie already had the bye in round 1
+        val alice = Player(id = "1", name = "Alice", rating = 2400)
+        val bob = Player(id = "2", name = "Bob", rating = 2300)
+        val charlie = Player(id = "3", name = "Charlie", rating = 2200)
+        val round1 =
+            Round(
+                number = 1,
+                games = listOf(Game(alice, bob, GameOutcome.WHITE_WINS)),
+                byePlayer = charlie,
+            )
+
+        // When
+        val result = pairNextRound(listOf(alice, bob, charlie), listOf(round1))
+
+        // Then: Bob gets the bye this time, and Alice plays Charlie,
+        // who gets white since he only has a bye and no color history yet
+        assertThat(result.byePlayer).isEqualTo(bob)
+        assertThat(result.pairings).containsExactly(Pairing(white = charlie, black = alice))
     }
 }

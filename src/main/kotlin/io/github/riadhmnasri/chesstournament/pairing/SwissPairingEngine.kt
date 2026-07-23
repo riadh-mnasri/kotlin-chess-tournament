@@ -2,6 +2,8 @@ package io.github.riadhmnasri.chesstournament.pairing
 
 import io.github.riadhmnasri.chesstournament.model.Pairing
 import io.github.riadhmnasri.chesstournament.model.Player
+import io.github.riadhmnasri.chesstournament.model.Round
+import io.github.riadhmnasri.chesstournament.standings.computeStandings
 
 /**
  * Pairs players for the first round of a Swiss tournament using the
@@ -38,3 +40,59 @@ fun pairFirstRound(players: List<Player>): RoundPairings {
 
     return RoundPairings(pairings = pairings, byePlayer = byePlayer)
 }
+
+/**
+ * Pairs players for a round after the first, given the games already
+ * played in [previousRounds].
+ *
+ * Players are ranked by their current standing (score, then the
+ * tie-break criteria from [io.github.riadhmnasri.chesstournament.standings.computeStandings]).
+ * The bye, if needed, goes to the lowest-ranked player who has not had
+ * one yet (see [selectByePlayer]). The remaining players are paired
+ * greedily from the top of the ranking down: each player is matched
+ * with the highest-ranked remaining player they have not already faced.
+ * Because players with the same score sit next to each other in the
+ * ranking, this naturally pairs players within the same score group
+ * first, and only reaches into a neighbouring score group when a repeat
+ * pairing would otherwise be unavoidable (a "floater", in Swiss
+ * pairing terms). Colors are then assigned by [allocateColors].
+ *
+ * If a player has, in the worst case, already faced every other
+ * remaining player, they are re-paired with the next available player
+ * rather than leaving the round unpairable; this is a known limitation
+ * for very small or very long tournaments, see the project README.
+ */
+fun pairNextRound(
+    players: List<Player>,
+    previousRounds: List<Round>,
+): RoundPairings {
+    val rankedPlayers = computeStandings(players, previousRounds).map { it.player }
+    val byePlayer = selectByePlayer(rankedPlayers, previousRounds)
+    val remainingPlayers = rankedPlayers.filterNot { it == byePlayer }.toMutableList()
+
+    val pairings = mutableListOf<Pairing>()
+    while (remainingPlayers.isNotEmpty()) {
+        val topPlayer = remainingPlayers.removeAt(0)
+        val opponentIndex =
+            remainingPlayers
+                .indexOfFirst { candidate -> !havePlayed(topPlayer, candidate, previousRounds) }
+                .takeIf { it >= 0 } ?: 0
+        val opponent = remainingPlayers.removeAt(opponentIndex)
+
+        val (white, black) = allocateColors(topPlayer, opponent, previousRounds)
+        pairings.add(Pairing(white = white, black = black))
+    }
+
+    return RoundPairings(pairings = pairings, byePlayer = byePlayer)
+}
+
+private fun havePlayed(
+    playerA: Player,
+    playerB: Player,
+    rounds: List<Round>,
+): Boolean =
+    rounds
+        .flatMap { it.games }
+        .any { game ->
+            (game.white == playerA && game.black == playerB) || (game.white == playerB && game.black == playerA)
+        }
