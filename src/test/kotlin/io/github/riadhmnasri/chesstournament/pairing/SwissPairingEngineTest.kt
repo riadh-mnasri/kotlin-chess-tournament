@@ -123,4 +123,39 @@ class SwissPairingEngineTest {
         assertThat(result.byePlayer).isEqualTo(bob)
         assertThat(result.pairings).containsExactly(Pairing(white = charlie, black = alice))
     }
+
+    @Test
+    fun `pairing falls back to a repeat when every remaining player has already been faced`() {
+        // Given: a complete round-robin between 4 players across 3 rounds,
+        // so every possible pair has already played once
+        val alice = Player(id = "1", name = "Alice", rating = 2400)
+        val bob = Player(id = "2", name = "Bob", rating = 2300)
+        val charlie = Player(id = "3", name = "Charlie", rating = 2200)
+        val dave = Player(id = "4", name = "Dave", rating = 2100)
+        val rounds =
+            listOf(
+                Round(
+                    number = 1,
+                    games = listOf(Game(alice, bob, GameOutcome.DRAW), Game(charlie, dave, GameOutcome.DRAW)),
+                ),
+                Round(
+                    number = 2,
+                    games = listOf(Game(alice, charlie, GameOutcome.DRAW), Game(bob, dave, GameOutcome.DRAW)),
+                ),
+                Round(
+                    number = 3,
+                    games = listOf(Game(alice, dave, GameOutcome.DRAW), Game(bob, charlie, GameOutcome.DRAW)),
+                ),
+            )
+
+        // When
+        val result = pairNextRound(listOf(alice, bob, charlie, dave), rounds)
+
+        // Then: pairing still succeeds, forced to repeat a past pairing, rather
+        // than throwing or leaving a player unpaired
+        assertThat(result.byePlayer).isNull()
+        assertThat(result.pairings).hasSize(2)
+        assertThat(result.pairings.flatMap { listOf(it.white, it.black) })
+            .containsExactlyInAnyOrder(alice, bob, charlie, dave)
+    }
 }
