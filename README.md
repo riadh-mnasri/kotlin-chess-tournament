@@ -17,7 +17,7 @@ Il existe de bonnes librairies JVM pour le parsing PGN/FEN et la génération de
 - **Gestion du bye** : le bye tourne entre les joueurs, il ne tombe jamais deux fois sur le même joueur tant qu'un autre candidat existe.
 - **Équilibrage des couleurs** : chaque joueur reçoit alternativement blancs et noirs, en évitant les séries de trois couleurs identiques.
 - **Calcul de rating Elo** : score espéré, mise à jour du rating, et une règle de K-factor simplifiée inspirée de la table FIDE.
-- **Classement final** : score, puis départage Buchholz et Sonneborn-Berger, avec un ordre toujours déterministe.
+- **Classement final** : score, puis départage Buchholz, Sonneborn-Berger et rating moyen des adversaires, avec un ordre toujours déterministe.
 
 ## Ce que la librairie ne fait pas (encore)
 
@@ -26,7 +26,7 @@ Cette librairie assume un **sous-ensemble pragmatique** du système Dutch offici
 - Pas de conformité stricte aux critères C1 à C20 du manuel FIDE.
 - Pas d'appariements accélérés (« accelerated pairings »).
 - Le K-factor Elo est une règle simplifiée (junior / standard / haut niveau), pas la table FIDE complète (nombre de parties jouées, fédération, etc.).
-- Le départage se limite à Buchholz et Sonneborn-Berger ; d'autres critères FIDE (rating moyen des adversaires, confrontation directe...) ne sont pas implémentés.
+- Le départage se limite à Buchholz, Sonneborn-Berger et rating moyen des adversaires ; d'autres critères FIDE (confrontation directe...) ne sont pas implémentés.
 
 Ce sont de bons points de départ pour une première contribution — voir [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -160,7 +160,7 @@ Pour voir ces six étapes enchaînées sur un tournoi de plusieurs rounds, avec 
 
 **Le rating Elo** estime la probabilité de gain d'un joueur face à un autre à partir de l'écart de rating (200 points d'écart ≈ 3 victoires sur 4 pour le mieux classé), puis ajuste le rating après la partie : plus le résultat est surprenant, plus l'ajustement est important. Le "K-factor" contrôle l'amplitude de cet ajustement.
 
-**Buchholz** additionne les scores finaux de tous les adversaires qu'un joueur a réellement affrontés : plus vos adversaires ont bien terminé le tournoi, plus votre Buchholz est élevé, ce qui récompense un parcours face à une opposition relevée. **Sonneborn-Berger** fait la même chose mais ne compte que les scores des adversaires battus (en entier) ou avec qui on a fait nulle (à moitié) — pas ceux contre qui on a perdu.
+**Buchholz** additionne les scores finaux de tous les adversaires qu'un joueur a réellement affrontés : plus vos adversaires ont bien terminé le tournoi, plus votre Buchholz est élevé, ce qui récompense un parcours face à une opposition relevée. **Sonneborn-Berger** fait la même chose mais ne compte que les scores des adversaires battus (en entier) ou avec qui on a fait nulle (à moitié), pas ceux contre qui on a perdu. **Le rating moyen des adversaires** (ARO) fait simplement la moyenne des ratings de tous les adversaires affrontés : à égalité parfaite sur les trois critères précédents, il départage en faveur de qui a affronté l'opposition la plus forte en valeur absolue.
 
 ## Qualité et développement
 
