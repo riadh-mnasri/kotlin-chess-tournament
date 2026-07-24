@@ -117,7 +117,8 @@ private fun printStandings(standings: List<Standing>) {
         val name = standing.player.name.padEnd(NAME_COLUMN_WIDTH)
         println(
             "  ${index + 1}. $name score=${standing.score} " +
-                "buchholz=${standing.buchholz} sonnebornBerger=${standing.sonnebornBerger}",
+                "buchholz=${standing.buchholz} sonnebornBerger=${standing.sonnebornBerger} " +
+                "aro=${standing.averageRatingOfOpponents}",
         )
     }
     println()

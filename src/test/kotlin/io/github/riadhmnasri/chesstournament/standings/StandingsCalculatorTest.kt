@@ -86,4 +86,33 @@ class StandingsCalculatorTest {
         // Then
         assertThat(standings.map { it.player }).containsExactly(amir, zoe)
     }
+
+    @Test
+    fun `average rating of opponents breaks a tie that score, buchholz and sonneborn berger could not`() {
+        // Given: Alice and Bob both win their only game, and their opponents
+        // both lose their only game, so score, buchholz (both 0, from a
+        // losing opponent) and sonneborn berger (both 0, from a 0 score
+        // opponent) are all tied on both sides. Alice's opponent is rated
+        // higher than Bob's, which only average rating of opponents can see.
+        val alice = Player(id = "a", name = "Alice", rating = 2400)
+        val bob = Player(id = "b", name = "Bob", rating = 2300)
+        val strongOpponent = Player(id = "s", name = "StrongOpponent", rating = 2200)
+        val weakOpponent = Player(id = "w", name = "WeakOpponent", rating = 1600)
+        val round1 =
+            Round(
+                number = 1,
+                games =
+                    listOf(
+                        Game(alice, strongOpponent, GameOutcome.WHITE_WINS),
+                        Game(bob, weakOpponent, GameOutcome.WHITE_WINS),
+                    ),
+            )
+
+        // When
+        val standings = computeStandings(listOf(alice, bob, strongOpponent, weakOpponent), listOf(round1))
+
+        // Then: Alice ranks above Bob (tougher opponent), and StrongOpponent
+        // ranks above WeakOpponent for the same reason, among the losers
+        assertThat(standings.map { it.player }).containsExactly(alice, bob, strongOpponent, weakOpponent)
+    }
 }
