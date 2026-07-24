@@ -7,7 +7,7 @@ The Gradle build is already fully configured to publish this library to Maven Ce
 ### One-time setup
 
 1. **Create a Central Portal account** at https://central.sonatype.com and sign in.
-2. **Verify the `io.github.riadh-mnasri` namespace.** Since this project uses the `io.github.<username>` namespace convention, verification is done by signing in with the matching GitHub account through Central Portal — no domain ownership needed.
+2. **Verify the `io.github.riadh-mnasri` namespace.** Since this project uses the `io.github.<username>` namespace convention, verification is done by signing in with the matching GitHub account through Central Portal (no domain ownership needed).
 3. **Generate a GPG key pair** to sign published artifacts:
    ```bash
    gpg --gen-key
@@ -17,10 +17,10 @@ The Gradle build is already fully configured to publish this library to Maven Ce
    Keep `private-key.asc` out of the repository; it is only used to fill in a GitHub secret (next step) and can then be deleted locally.
 4. **Generate a Central Portal user token** (Account → Generate User Token on central.sonatype.com). This token, not your account password, is what the build uses to authenticate.
 5. **Add four repository secrets** under *Settings → Secrets and variables → Actions* on GitHub:
-   - `ORG_GRADLE_PROJECT_mavenCentralUsername` — the user token's username part
-   - `ORG_GRADLE_PROJECT_mavenCentralPassword` — the user token's password part
-   - `ORG_GRADLE_PROJECT_signingInMemoryKey` — the full contents of `private-key.asc`
-   - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword` — the passphrase you set for the GPG key
+   - `ORG_GRADLE_PROJECT_mavenCentralUsername`: the user token's username part
+   - `ORG_GRADLE_PROJECT_mavenCentralPassword`: the user token's password part
+   - `ORG_GRADLE_PROJECT_signingInMemoryKey`: the full contents of `private-key.asc`
+   - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword`: the passphrase you set for the GPG key
 
 ### Releasing a version
 
@@ -44,7 +44,7 @@ Le build Gradle est déjà entièrement configuré pour publier cette librairie 
 ### Configuration à faire une seule fois
 
 1. **Créer un compte Central Portal** sur https://central.sonatype.com et se connecter.
-2. **Vérifier le namespace `io.github.riadh-mnasri`.** Ce projet utilise la convention de namespace `io.github.<pseudo>`, donc la vérification se fait simplement en se connectant avec le compte GitHub correspondant via Central Portal — pas besoin de posséder un nom de domaine.
+2. **Vérifier le namespace `io.github.riadh-mnasri`.** Ce projet utilise la convention de namespace `io.github.<pseudo>`, donc la vérification se fait simplement en se connectant avec le compte GitHub correspondant via Central Portal (pas besoin de posséder un nom de domaine).
 3. **Générer une paire de clés GPG** pour signer les artefacts publiés :
    ```bash
    gpg --gen-key
@@ -54,10 +54,10 @@ Le build Gradle est déjà entièrement configuré pour publier cette librairie 
    Ne mettez jamais `private-key.asc` dans le repo ; il sert uniquement à remplir un secret GitHub (étape suivante), puis peut être supprimé localement.
 4. **Générer un « user token » Central Portal** (Account → Generate User Token sur central.sonatype.com). C'est ce token, et non le mot de passe du compte, que le build utilise pour s'authentifier.
 5. **Ajouter quatre secrets de repository** dans *Settings → Secrets and variables → Actions* sur GitHub :
-   - `ORG_GRADLE_PROJECT_mavenCentralUsername` — la partie identifiant du user token
-   - `ORG_GRADLE_PROJECT_mavenCentralPassword` — la partie mot de passe du user token
-   - `ORG_GRADLE_PROJECT_signingInMemoryKey` — le contenu complet de `private-key.asc`
-   - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword` — la passphrase choisie pour la clé GPG
+   - `ORG_GRADLE_PROJECT_mavenCentralUsername` : la partie identifiant du user token
+   - `ORG_GRADLE_PROJECT_mavenCentralPassword` : la partie mot de passe du user token
+   - `ORG_GRADLE_PROJECT_signingInMemoryKey` : le contenu complet de `private-key.asc`
+   - `ORG_GRADLE_PROJECT_signingInMemoryKeyPassword` : la passphrase choisie pour la clé GPG
 
 ### Publier une version
 
