@@ -25,7 +25,7 @@ Cette librairie assume un **sous-ensemble pragmatique** du système Dutch offici
 
 - Pas de conformité stricte aux critères C1 à C20 du manuel FIDE.
 - Pas d'appariements accélérés (« accelerated pairings »).
-- Le K-factor Elo est une règle simplifiée (junior / standard / haut niveau), pas la table FIDE complète (nombre de parties jouées, fédération, etc.).
+- Le K-factor Elo est une règle simplifiée (junior / standard / haut niveau / nouveau joueur selon le nombre de parties), pas la table FIDE complète (variation par fédération, maintien à 10 à vie une fois 2400 atteint, etc.).
 - Le départage se limite à Buchholz, Sonneborn-Berger et rating moyen des adversaires ; d'autres critères FIDE (confrontation directe...) ne sont pas implémentés.
 
 Ce sont de bons points de départ pour une première contribution : voir [CONTRIBUTING.md](CONTRIBUTING.md).

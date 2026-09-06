@@ -25,7 +25,7 @@ This library implements a **pragmatic subset** of the official FIDE Dutch system
 
 - No strict compliance with the C1 to C20 criteria from the FIDE handbook.
 - No accelerated pairings.
-- The Elo K-factor is a simplified rule (junior / standard / top player), not the full FIDE table (number of rated games, federation, and so on).
+- The Elo K-factor is a simplified rule (junior / standard / top player / new player by rated game count), not the full FIDE table (variation by federation, keeping K at 10 for life once 2400 is reached, and so on).
 - Tie-breaks are limited to Buchholz, Sonneborn-Berger and average rating of opponents; other FIDE criteria (direct encounter...) are not implemented.
 
 These are good starting points for a first contribution, see [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -67,4 +67,59 @@ class KFactorTest {
         // Then
         assertThat(kFactor).isEqualTo(20)
     }
+
+    @Test
+    fun `a player new to the rating list with fewer than 30 rated games gets the highest K-factor`() {
+        // Given
+        val age = 30
+        val rating = 1800
+        val ratedGamesPlayed = 12
+
+        // When
+        val kFactor = kFactorFor(rating, age, ratedGamesPlayed)
+
+        // Then
+        assertThat(kFactor).isEqualTo(40)
+    }
+
+    @Test
+    fun `a player new to the rating list gets the highest K-factor even when rated 2400 or above`() {
+        // Given
+        val age = 30
+        val rating = 2450
+        val ratedGamesPlayed = 5
+
+        // When
+        val kFactor = kFactorFor(rating, age, ratedGamesPlayed)
+
+        // Then
+        assertThat(kFactor).isEqualTo(40)
+    }
+
+    @Test
+    fun `a player with 30 or more rated games is no longer treated as new to the rating list`() {
+        // Given
+        val age = 30
+        val rating = 1800
+        val ratedGamesPlayed = 30
+
+        // When
+        val kFactor = kFactorFor(rating, age, ratedGamesPlayed)
+
+        // Then
+        assertThat(kFactor).isEqualTo(20)
+    }
+
+    @Test
+    fun `an unknown rated game count does not trigger the new-player K-factor`() {
+        // Given
+        val age = 30
+        val rating = 1800
+
+        // When
+        val kFactor = kFactorFor(rating, age)
+
+        // Then
+        assertThat(kFactor).isEqualTo(20)
+    }
 }
