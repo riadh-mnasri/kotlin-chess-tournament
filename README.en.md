@@ -49,7 +49,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.riadh-mnasri:kotlin-chess-tournament:0.1.0-SNAPSHOT")
+    implementation("io.github.riadh-mnasri:kotlin-chess-tournament:0.1.0")
 }
 ```
 
