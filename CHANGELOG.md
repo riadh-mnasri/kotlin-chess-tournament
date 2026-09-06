@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-07
+
 ### Added
 
 - Elo rating calculation: expected score, rating update, and a simplified FIDE-inspired K-factor rule.
-- Standings computation: cumulative score, Buchholz and Sonneborn-Berger tie-breaks, deterministic ranking.
+- Standings computation: cumulative score, Buchholz, Sonneborn-Berger and average-rating-of-opponents tie-breaks, deterministic ranking.
 - Swiss-system pairing: first round by top-half-versus-bottom-half, subsequent rounds by score group with repeat-pairing avoidance, rotating bye, and color balancing.
 - A runnable sample tournament under `examples/`.
 - Bilingual README (French/English), CONTRIBUTING guide, Code of Conduct, and security policy.
