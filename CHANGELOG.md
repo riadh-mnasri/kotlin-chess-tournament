@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `kFactorFor` now accepts an optional `ratedGamesPlayed` count and returns the highest K-factor for a player new to the rating list (fewer than 30 rated games), regardless of rating or age.
+
 ## [0.1.0] - 2026-09-07
 
 ### Added
