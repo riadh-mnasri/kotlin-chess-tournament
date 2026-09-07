@@ -14,6 +14,7 @@ There are good JVM libraries for PGN/FEN parsing and legal move generation (for 
 ## What the library does
 
 - **Swiss-system pairing** (Dutch variant): first round by splitting the ranking into a top and bottom half, later rounds by score group while avoiding repeat pairings.
+- **Round-robin tournaments**: the full schedule generated at once (circle method), single or double with colors swapped on the second cycle.
 - **Bye handling**: the bye rotates between players, never falling on the same player twice while another candidate is available.
 - **Color allocation**: each player alternates between white and black, avoiding three games in a row with the same color.
 - **Elo rating calculation**: expected score, rating update, and a simplified K-factor rule inspired by the FIDE table.
