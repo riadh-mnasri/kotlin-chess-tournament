@@ -24,7 +24,7 @@ There are good JVM libraries for PGN/FEN parsing and legal move generation (for 
 This library implements a **pragmatic subset** of the official FIDE Dutch system, not its full specification:
 
 - No strict compliance with the C1 to C20 criteria from the FIDE handbook.
-- No accelerated pairings.
+- Accelerated pairings exist but remain optional and opt-in (`pairNextRound(..., virtualPointsByPlayer = ...)`), with a single simplified schedule provided as a helper (`acceleratedVirtualPoints`); this is not FIDE's official Baku schedule (which depends on group size).
 - The Elo K-factor is a simplified rule (junior / standard / top player / new player by rated game count), not the full FIDE table (variation by federation, keeping K at 10 for life once 2400 is reached, and so on).
 - Tie-breaks are limited to Buchholz, Sonneborn-Berger, average rating of opponents and direct encounter; other FIDE criteria are not implemented.
 

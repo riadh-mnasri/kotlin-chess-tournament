@@ -125,6 +125,42 @@ class SwissPairingEngineTest {
     }
 
     @Test
+    fun `virtual points change pairing order without affecting who is repeated`() {
+        // Given: same round 1 as the plain score-group test, but every
+        // player is rated 2000 so ties resolve alphabetically, making the
+        // baseline pairing order deterministic: Alice, Charlie (1 pt each,
+        // alphabetical), then Bob, Dave (0 pt each, alphabetical)
+        val alice = Player(id = "1", name = "Alice", rating = 2000)
+        val bob = Player(id = "2", name = "Bob", rating = 2000)
+        val charlie = Player(id = "3", name = "Charlie", rating = 2000)
+        val dave = Player(id = "4", name = "Dave", rating = 2000)
+        val round1 =
+            Round(
+                number = 1,
+                games =
+                    listOf(
+                        Game(alice, bob, GameOutcome.WHITE_WINS),
+                        Game(charlie, dave, GameOutcome.WHITE_WINS),
+                    ),
+            )
+
+        // When: Bob gets a 1.5 virtual point bonus, pushing him above
+        // Alice and Charlie's real 1.0 for pairing purposes only
+        val result =
+            pairNextRound(
+                players = listOf(alice, bob, charlie, dave),
+                previousRounds = listOf(round1),
+                virtualPointsByPlayer = mapOf(bob to 1.5),
+            )
+
+        // Then: Bob (now top-ranked) cannot repeat against Alice, so he is
+        // paired with Charlie instead, leaving Alice to play Dave -
+        // different from the un-accelerated Alice-Charlie / Bob-Dave pairing
+        val playerPairs = result.pairings.map { setOf(it.white, it.black) }
+        assertThat(playerPairs).containsExactlyInAnyOrder(setOf(bob, charlie), setOf(alice, dave))
+    }
+
+    @Test
     fun `pairing falls back to a repeat when every remaining player has already been faced`() {
         // Given: a complete round-robin between 4 players across 3 rounds,
         // so every possible pair has already played once

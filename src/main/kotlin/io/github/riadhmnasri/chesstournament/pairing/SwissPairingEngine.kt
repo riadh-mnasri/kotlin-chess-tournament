@@ -61,12 +61,27 @@ fun pairFirstRound(players: List<Player>): RoundPairings {
  * remaining player, they are re-paired with the next available player
  * rather than leaving the round unpairable; this is a known limitation
  * for very small or very long tournaments, see the project README.
+ *
+ * [virtualPointsByPlayer] optionally adds a bonus to a player's score for
+ * *pairing purposes only* (real standings and scores are unaffected): a
+ * common technique in large open tournaments, known as accelerated
+ * pairings, to separate contenders from the rest of the field faster. It
+ * only changes which players are considered tied when ranking for this
+ * round; all other tie-break criteria still come from the real
+ * [computeStandings] order, since re-sorting a fully tie-broken list by
+ * an additional criterion is a stable operation. Leave it empty (the
+ * default) for no acceleration. See [acceleratedVirtualPoints] for a
+ * ready-made schedule, or compute your own.
  */
 fun pairNextRound(
     players: List<Player>,
     previousRounds: List<Round>,
+    virtualPointsByPlayer: Map<Player, Double> = emptyMap(),
 ): RoundPairings {
-    val rankedPlayers = computeStandings(players, previousRounds).map { it.player }
+    val rankedPlayers =
+        computeStandings(players, previousRounds)
+            .sortedByDescending { standing -> standing.score + (virtualPointsByPlayer[standing.player] ?: 0.0) }
+            .map { it.player }
     val byePlayer = selectByePlayer(rankedPlayers, previousRounds)
     val remainingPlayers = rankedPlayers.filterNot { it == byePlayer }.toMutableList()
 

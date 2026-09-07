@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Accelerated pairings, opt-in via `pairNextRound`'s new `virtualPointsByPlayer` parameter (empty by default, no behavior change for existing callers). A ready-made schedule is provided via `acceleratedVirtualPoints`: the top half of the field gets a +1.0 virtual point bonus in round 1 and +0.5 in round 2, for pairing purposes only.
+
+
 - `kFactorFor` now accepts an optional `ratedGamesPlayed` count and returns the highest K-factor for a player new to the rating list (fewer than 30 rated games), regardless of rating or age.
 - Direct encounter tie-break, applied as a fifth criterion after average rating of opponents. Only takes effect within a group of players still fully tied after the first four criteria, and only when that group forms a complete mini round-robin (every pair played each other exactly once); otherwise it has no effect and standings fall back to alphabetical order. Implemented as a per-player mini-score rather than a pairwise comparator, so it cannot violate the comparator contract on a cyclic result (A beat B, B beat C, C beat A).
 
