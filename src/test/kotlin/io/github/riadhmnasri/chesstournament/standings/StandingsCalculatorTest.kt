@@ -88,6 +88,57 @@ class StandingsCalculatorTest {
     }
 
     @Test
+    fun `direct encounter breaks a tie that score, buchholz, sonneborn berger and ARO could not`() {
+        // Given: Alice and Bob play each other in round 1 (Alice wins), then
+        // each takes a "mirrored" extra loss and win against P1/P2 (rated
+        // the same as each other, lower than Alice/Bob) so score, buchholz,
+        // sonneborn berger and average rating of opponents all end up tied
+        // between Alice and Bob. F1/F2 (rated even lower) give P1/P2 a
+        // second game so P1 and P2's final scores also match, which keeps
+        // Alice's and Bob's buchholz tied.
+        val alice = Player(id = "alice", name = "Alice", rating = 2000)
+        val bob = Player(id = "bob", name = "Bob", rating = 2000)
+        val p1 = Player(id = "p1", name = "P1", rating = 1900)
+        val p2 = Player(id = "p2", name = "P2", rating = 1900)
+        val f1 = Player(id = "f1", name = "F1", rating = 1700)
+        val f2 = Player(id = "f2", name = "F2", rating = 1700)
+        val rounds =
+            listOf(
+                Round(number = 1, games = listOf(Game(alice, bob, GameOutcome.WHITE_WINS))),
+                Round(
+                    number = 2,
+                    games =
+                        listOf(
+                            Game(p1, alice, GameOutcome.WHITE_WINS),
+                            Game(bob, p2, GameOutcome.WHITE_WINS),
+                        ),
+                ),
+                Round(
+                    number = 3,
+                    games =
+                        listOf(
+                            Game(f1, p1, GameOutcome.WHITE_WINS),
+                            Game(p2, f2, GameOutcome.WHITE_WINS),
+                        ),
+                ),
+            )
+
+        // When
+        val standings = computeStandings(listOf(alice, bob, p1, p2, f1, f2), rounds)
+
+        // Then: Alice and Bob are fully tied on the first four criteria...
+        val aliceStanding = standings.single { it.player == alice }
+        val bobStanding = standings.single { it.player == bob }
+        assertThat(aliceStanding.score).isCloseTo(bobStanding.score, Offset.offset(0.0001))
+        assertThat(aliceStanding.buchholz).isCloseTo(bobStanding.buchholz, Offset.offset(0.0001))
+        assertThat(aliceStanding.sonnebornBerger).isCloseTo(bobStanding.sonnebornBerger, Offset.offset(0.0001))
+        assertThat(aliceStanding.averageRatingOfOpponents)
+            .isCloseTo(bobStanding.averageRatingOfOpponents, Offset.offset(0.0001))
+        // ...but Alice won their round-1 game, so direct encounter ranks her above Bob
+        assertThat(standings.indexOf(aliceStanding)).isLessThan(standings.indexOf(bobStanding))
+    }
+
+    @Test
     fun `average rating of opponents breaks a tie that score, buchholz and sonneborn berger could not`() {
         // Given: Alice and Bob both win their only game, and their opponents
         // both lose their only game, so score, buchholz (both 0, from a
