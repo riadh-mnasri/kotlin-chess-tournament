@@ -25,7 +25,7 @@ This library implements a **pragmatic subset** of the official FIDE Dutch system
 
 - No strict compliance with the C1 to C20 criteria from the FIDE handbook.
 - Accelerated pairings exist but remain optional and opt-in (`pairNextRound(..., virtualPointsByPlayer = ...)`), with a single simplified schedule provided as a helper (`acceleratedVirtualPoints`); this is not FIDE's official Baku schedule (which depends on group size).
-- The Elo K-factor is a simplified rule (junior / standard / top player / new player by rated game count), not the full FIDE table (variation by federation, keeping K at 10 for life once 2400 is reached, and so on).
+- The Elo K-factor is a simplified rule (junior / standard / top player, including for life once 2400 is reached / new player by rated game count), not the full FIDE table (no variation by federation, and the lifetime flag must be tracked and passed in by the caller — this library has no persistent player history).
 - Tie-breaks are limited to Buchholz, Sonneborn-Berger, average rating of opponents and direct encounter; other FIDE criteria are not implemented.
 
 These are good starting points for a first contribution, see [CONTRIBUTING.md](CONTRIBUTING.md).

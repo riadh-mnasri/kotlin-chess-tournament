@@ -122,4 +122,57 @@ class KFactorTest {
         // Then
         assertThat(kFactor).isEqualTo(20)
     }
+
+    @Test
+    fun `a player who has ever reached 2400 keeps the lowest K-factor even after dropping back below it`() {
+        // Given
+        val age = 30
+        val rating = 2350
+
+        // When
+        val kFactor = kFactorFor(rating, age, hasEverReachedTopRating = true)
+
+        // Then
+        assertThat(kFactor).isEqualTo(10)
+    }
+
+    @Test
+    fun `a player currently at or above 2400 gets the lowest K-factor regardless of the lifetime flag`() {
+        // Given
+        val age = 30
+        val rating = 2450
+
+        // When
+        val kFactor = kFactorFor(rating, age, hasEverReachedTopRating = false)
+
+        // Then
+        assertThat(kFactor).isEqualTo(10)
+    }
+
+    @Test
+    fun `the lifetime top-rating flag defaults to false and does not change existing behavior`() {
+        // Given
+        val age = 30
+        val rating = 2350
+
+        // When
+        val kFactor = kFactorFor(rating, age)
+
+        // Then
+        assertThat(kFactor).isEqualTo(20)
+    }
+
+    @Test
+    fun `a new player takes priority over a stale lifetime top-rating flag`() {
+        // Given: fewer than 30 rated games, even if somehow flagged as having once reached 2400
+        val age = 30
+        val rating = 1800
+        val ratedGamesPlayed = 5
+
+        // When
+        val kFactor = kFactorFor(rating, age, ratedGamesPlayed, hasEverReachedTopRating = true)
+
+        // Then
+        assertThat(kFactor).isEqualTo(40)
+    }
 }
