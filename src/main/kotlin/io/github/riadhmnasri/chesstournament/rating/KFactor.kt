@@ -23,23 +23,29 @@ private const val TOP_PLAYER_K_FACTOR = 10
  * The rule applied here is:
  * - 40 for a player new to the rating list, i.e. who has played fewer
  *   than [NEW_PLAYER_GAMES_CUTOFF] rated games in total (when
- *   [ratedGamesPlayed] is known), regardless of rating or age
+ *   [ratedGamesPlayed] is known), regardless of rating or age; this takes
+ *   priority over every other rule below, since a brand new player can't
+ *   meaningfully have an established lifetime top-rating history yet
+ * - 10 for anyone currently rated [TOP_PLAYER_RATING_CUTOFF] or above, or
+ *   whose rating has ever reached it before ([hasEverReachedTopRating])
  * - 40 for a junior (under [JUNIOR_AGE_CUTOFF]) rated below [JUNIOR_RATING_CUTOFF]
- * - 10 for anyone rated [TOP_PLAYER_RATING_CUTOFF] or above
  * - 20 otherwise
  *
  * [age] and [ratedGamesPlayed] can both be omitted when unknown; the
  * player is then treated as an established adult for the purpose of this
- * rule.
+ * rule. [hasEverReachedTopRating] is the caller's responsibility to track
+ * and pass in: this remains a per-call snapshot function with no
+ * persistent player history of its own.
  */
 fun kFactorFor(
     rating: Int,
     age: Int? = null,
     ratedGamesPlayed: Int? = null,
+    hasEverReachedTopRating: Boolean = false,
 ): Int =
     when {
         ratedGamesPlayed != null && ratedGamesPlayed < NEW_PLAYER_GAMES_CUTOFF -> JUNIOR_K_FACTOR
+        rating >= TOP_PLAYER_RATING_CUTOFF || hasEverReachedTopRating -> TOP_PLAYER_K_FACTOR
         age != null && age < JUNIOR_AGE_CUTOFF && rating < JUNIOR_RATING_CUTOFF -> JUNIOR_K_FACTOR
-        rating >= TOP_PLAYER_RATING_CUTOFF -> TOP_PLAYER_K_FACTOR
         else -> STANDARD_K_FACTOR
     }
