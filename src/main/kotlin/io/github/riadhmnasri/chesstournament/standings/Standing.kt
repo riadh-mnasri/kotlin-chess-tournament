@@ -9,4 +9,5 @@ data class Standing(
     val buchholz: Double,
     val sonnebornBerger: Double,
     val averageRatingOfOpponents: Double,
+    val directEncounter: Double,
 )

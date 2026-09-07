@@ -17,7 +17,7 @@ There are good JVM libraries for PGN/FEN parsing and legal move generation (for 
 - **Bye handling**: the bye rotates between players, never falling on the same player twice while another candidate is available.
 - **Color allocation**: each player alternates between white and black, avoiding three games in a row with the same color.
 - **Elo rating calculation**: expected score, rating update, and a simplified K-factor rule inspired by the FIDE table.
-- **Final standings**: score, then Buchholz, Sonneborn-Berger and average rating of opponents tie-breaks, always in a deterministic order.
+- **Final standings**: score, then Buchholz, Sonneborn-Berger, average rating of opponents and direct encounter (within a group that forms a complete mini round-robin) tie-breaks, always in a deterministic order.
 
 ## What the library does not do (yet)
 
@@ -26,7 +26,7 @@ This library implements a **pragmatic subset** of the official FIDE Dutch system
 - No strict compliance with the C1 to C20 criteria from the FIDE handbook.
 - No accelerated pairings.
 - The Elo K-factor is a simplified rule (junior / standard / top player / new player by rated game count), not the full FIDE table (variation by federation, keeping K at 10 for life once 2400 is reached, and so on).
-- Tie-breaks are limited to Buchholz, Sonneborn-Berger and average rating of opponents; other FIDE criteria (direct encounter...) are not implemented.
+- Tie-breaks are limited to Buchholz, Sonneborn-Berger, average rating of opponents and direct encounter; other FIDE criteria are not implemented.
 
 These are good starting points for a first contribution, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -160,7 +160,7 @@ To see these six steps chained together over a multi-round tournament, printing 
 
 **Elo rating** estimates a player's win probability against another from the rating gap between them (a 200 point gap is roughly a 3-in-4 expected result for the stronger player), then adjusts the rating after the game: the more surprising the result, the bigger the adjustment. The "K-factor" controls how large that adjustment can be.
 
-**Buchholz** adds up the final scores of every opponent a player actually faced: the better your opponents finished the tournament, the higher your Buchholz, which rewards a tough schedule. **Sonneborn-Berger** does the same thing but only counts the score of opponents you beat (in full) or drew (halved), not the ones you lost to. **Average Rating of Opponents** (ARO) simply averages the ratings of every opponent faced: when the three previous criteria are perfectly tied, it breaks the tie in favor of whoever faced the strongest opposition in absolute terms.
+**Buchholz** adds up the final scores of every opponent a player actually faced: the better your opponents finished the tournament, the higher your Buchholz, which rewards a tough schedule. **Sonneborn-Berger** does the same thing but only counts the score of opponents you beat (in full) or drew (halved), not the ones you lost to. **Average Rating of Opponents** (ARO) simply averages the ratings of every opponent faced: when the three previous criteria are perfectly tied, it breaks the tie in favor of whoever faced the strongest opposition in absolute terms. **Direct encounter** only applies within a group of players still perfectly tied after the four previous criteria, and only when that group forms a complete mini round-robin (every player in it faced every other player exactly once): in that case, the mini-score earned only in those internal games breaks the tie within the group; otherwise (a missing or repeated game, or a cyclic result like A beats B, B beats C, C beats A), the criterion has no effect and standings fall back to alphabetical order.
 
 ## Quality and development
 
