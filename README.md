@@ -14,6 +14,7 @@ Il existe de bonnes librairies JVM pour le parsing PGN/FEN et la génération de
 ## Ce que fait la librairie
 
 - **Appariement au système suisse** (variante Dutch) : premier tour par répartition haut/bas du classement, tours suivants par groupes de score avec évitement des répétitions.
+- **Tournois toutes rondes (round-robin)** : calendrier complet généré d'un coup (méthode du cercle), simple ou double avec inversion des couleurs au second tour.
 - **Gestion du bye** : le bye tourne entre les joueurs, il ne tombe jamais deux fois sur le même joueur tant qu'un autre candidat existe.
 - **Équilibrage des couleurs** : chaque joueur reçoit alternativement blancs et noirs, en évitant les séries de trois couleurs identiques.
 - **Calcul de rating Elo** : score espéré, mise à jour du rating, et une règle de K-factor simplifiée inspirée de la table FIDE.
