@@ -26,7 +26,7 @@ Il existe de bonnes librairies JVM pour le parsing PGN/FEN et la génération de
 Cette librairie assume un **sous-ensemble pragmatique** du système Dutch officiel de la FIDE, pas sa spécification intégrale :
 
 - Pas de conformité stricte aux critères C1 à C20 du manuel FIDE.
-- Les appariements accélérés (« accelerated pairings ») existent mais restent optionnels et opt-in (`pairNextRound(..., virtualPointsByPlayer = ...)`), avec un seul barème simplifié fourni en aide (`acceleratedVirtualPoints`) ; ce n'est pas le barème officiel FIDE Baku (qui dépend de la taille du groupe).
+- Les appariements accélérés (« accelerated pairings ») existent mais restent optionnels et opt-in (`pairNextRound(..., virtualPointsByPlayer = ...)`), avec deux barèmes fournis en aide : `acceleratedVirtualPoints` (simplifié, top/bottom fixe) et `bakuAcceleratedVirtualPoints` (l'algorithme officiel FIDE Baku, [FIDE Handbook C.04.7](https://handbook.fide.com/chapter/C0407202602), qui dépend de la taille du groupe et du nombre de rounds).
 - Le K-factor Elo est une règle simplifiée (junior / standard / haut niveau, y compris à vie une fois 2400 atteint / nouveau joueur selon le nombre de parties), pas la table FIDE complète (pas de variation par fédération, et le maintien à vie doit être suivi et transmis par l'appelant, la librairie n'a pas d'historique persistant des joueurs).
 - Le départage se limite à Buchholz, Buchholz Cut-1, Sonneborn-Berger, rating moyen des adversaires et confrontation directe ; d'autres critères FIDE ne sont pas implémentés.
 
