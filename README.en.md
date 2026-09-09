@@ -18,6 +18,7 @@ There are good JVM libraries for PGN/FEN parsing and legal move generation (for 
 - **Bye handling**: the bye rotates between players, never falling on the same player twice while another candidate is available.
 - **Color allocation**: each player alternates between white and black, avoiding three games in a row with the same color.
 - **Elo rating calculation**: expected score, rating update, and a simplified K-factor rule inspired by the FIDE table.
+- **Tournament performance rating (TPR)**: the rating an actual score against the real opponents faced would be worth, computed exactly via binary search (not the traditional "dp lookup table" approximation).
 - **Final standings**: score, then Buchholz, Sonneborn-Berger, average rating of opponents and direct encounter (within a group that forms a complete mini round-robin) tie-breaks, always in a deterministic order.
 
 ## What the library does not do (yet)
