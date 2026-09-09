@@ -16,6 +16,17 @@ import io.github.riadhmnasri.chesstournament.model.Round
  * 3. If they are still tied (typically because neither has played yet),
  *    the higher-rated player gets white, purely for a deterministic result.
  *
+ * Rule 1 alone already guarantees no player's color difference (white
+ * games minus black games) can ever exceed +-2 in absolute value: within
+ * any single pairing, whoever has the strictly lower balance gets white,
+ * so a player already at a difference of +2 can only ever be handed
+ * white again by a same-round opponent whose own balance is at least as
+ * high — an opponent who, symmetrically, needs black at least as
+ * urgently, so favoring them is the better outcome for keeping the
+ * *maximum* imbalance in the field as small as possible. No separate cap
+ * check is needed on top of rule 1; this is exercised end-to-end by a
+ * multi-round property test in `ColorAllocatorTest`.
+ *
  * Returns a (white, black) pair.
  */
 internal fun allocateColors(
