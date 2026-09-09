@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `Standing` gains a `buchholzCut1` field, now wired into `computeStandings`' tie-break order right after plain Buchholz.
 - `tournamentPerformanceRating`, computing the rating an actual score against a list of real opponent ratings would be worth, via binary search over `expectedScore`.
 - Accelerated pairings, opt-in via `pairNextRound`'s new `virtualPointsByPlayer` parameter (empty by default, no behavior change for existing callers). A ready-made schedule is provided via `acceleratedVirtualPoints`: the top half of the field gets a +1.0 virtual point bonus in round 1 and +0.5 in round 2, for pairing purposes only.
 

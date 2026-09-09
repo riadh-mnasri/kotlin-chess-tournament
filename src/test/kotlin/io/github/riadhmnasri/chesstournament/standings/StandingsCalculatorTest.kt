@@ -139,6 +139,47 @@ class StandingsCalculatorTest {
     }
 
     @Test
+    fun `buchholz cut-1 breaks a tie that score and plain buchholz could not`() {
+        // Given: Alice and Bob both score 1.0 (one win, one loss), and both
+        // have a plain Buchholz of 4.0, but their opponents' scores are
+        // distributed differently: Alice's are 1.0 and 3.0 (cutting the
+        // lowest leaves 3.0), Bob's are 2.0 and 2.0 (cutting one leaves 2.0)
+        val names = listOf("alice", "bob", "p1", "p2", "p3", "p4", "f1", "f2", "f3", "f4", "f5", "f6")
+        val byName = names.associateWith { Player(id = it, name = it, rating = 2000) }
+        val alice = byName.getValue("alice")
+        val bob = byName.getValue("bob")
+        val p1 = byName.getValue("p1")
+        val p2 = byName.getValue("p2")
+        val p3 = byName.getValue("p3")
+        val p4 = byName.getValue("p4")
+        val f1 = byName.getValue("f1")
+        val f2 = byName.getValue("f2")
+        val f3 = byName.getValue("f3")
+        val f4 = byName.getValue("f4")
+        val f5 = byName.getValue("f5")
+        val f6 = byName.getValue("f6")
+        val rounds =
+            listOf(
+                winsRound(1, alice to p1, bob to p3),
+                winsRound(2, p2 to alice, p4 to bob),
+                winsRound(3, p1 to f1, p2 to f2, p3 to f3, p4 to f4),
+                winsRound(4, p2 to f5, p3 to f6),
+            )
+
+        // When
+        val standings = computeStandings(byName.values.toList(), rounds)
+
+        // Then: P1=1.0, P2=3.0 (Alice's opponents); P3=2.0, P4=2.0 (Bob's opponents)
+        val aliceStanding = standings.single { it.player == alice }
+        val bobStanding = standings.single { it.player == bob }
+        assertThat(aliceStanding.score).isCloseTo(bobStanding.score, Offset.offset(0.0001))
+        assertThat(aliceStanding.buchholz).isCloseTo(bobStanding.buchholz, Offset.offset(0.0001))
+        assertThat(aliceStanding.buchholzCut1).isCloseTo(3.0, Offset.offset(0.0001))
+        assertThat(bobStanding.buchholzCut1).isCloseTo(2.0, Offset.offset(0.0001))
+        assertThat(standings.indexOf(aliceStanding)).isLessThan(standings.indexOf(bobStanding))
+    }
+
+    @Test
     fun `average rating of opponents breaks a tie that score, buchholz and sonneborn berger could not`() {
         // Given: Alice and Bob both win their only game, and their opponents
         // both lose their only game, so score, buchholz (both 0, from a
@@ -166,4 +207,10 @@ class StandingsCalculatorTest {
         // ranks above WeakOpponent for the same reason, among the losers
         assertThat(standings.map { it.player }).containsExactly(alice, bob, strongOpponent, weakOpponent)
     }
+
+    /** A round where every given (winner, loser) pair plays a decisive game, winner as white. */
+    private fun winsRound(
+        number: Int,
+        vararg results: Pair<Player, Player>,
+    ) = Round(number = number, games = results.map { (winner, loser) -> Game(winner, loser, GameOutcome.WHITE_WINS) })
 }

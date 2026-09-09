@@ -7,6 +7,7 @@ data class Standing(
     val player: Player,
     val score: Double,
     val buchholz: Double,
+    val buchholzCut1: Double,
     val sonnebornBerger: Double,
     val averageRatingOfOpponents: Double,
     val directEncounter: Double,
