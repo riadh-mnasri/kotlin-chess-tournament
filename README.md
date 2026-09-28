@@ -20,6 +20,7 @@ Il existe de bonnes librairies JVM pour le parsing PGN/FEN et la génération de
 - **Calcul de rating Elo** : score espéré, mise à jour du rating, et une règle de K-factor simplifiée inspirée de la table FIDE.
 - **Performance de tournoi (TPR)** : rating qu'aurait produit le score réalisé face aux adversaires effectivement rencontrés, calculé exactement par recherche dichotomique (pas la table d'approximation « dp » traditionnelle).
 - **Classement final** : score, puis départage Buchholz, Buchholz Cut-1, Sonneborn-Berger, rating moyen des adversaires et confrontation directe (au sein d'un groupe formant un mini round-robin complet), avec un ordre toujours déterministe.
+- **Tournois par équipes** (package `team`) : appariement suisse d'équipes à effectif fixe (jamais deux fois les mêmes équipes), couleurs alternées par échiquier, score en points de match (2/1/0) ou en points de partie (somme des échiquiers), classement par équipes.
 
 ## Ce que la librairie ne fait pas (encore)
 
@@ -29,6 +30,7 @@ Cette librairie assume un **sous-ensemble pragmatique** du système Dutch offici
 - Les appariements accélérés (« accelerated pairings ») existent mais restent optionnels et opt-in (`pairNextRound(..., virtualPointsByPlayer = ...)`), avec deux barèmes fournis en aide : `acceleratedVirtualPoints` (simplifié, top/bottom fixe) et `bakuAcceleratedVirtualPoints` (l'algorithme officiel FIDE Baku, [FIDE Handbook C.04.7](https://handbook.fide.com/chapter/C0407202602), qui dépend de la taille du groupe et du nombre de rounds).
 - Le K-factor Elo est une règle simplifiée (junior / standard / haut niveau, y compris à vie une fois 2400 atteint / nouveau joueur selon le nombre de parties), pas la table FIDE complète (pas de variation par fédération, et le maintien à vie doit être suivi et transmis par l'appelant, la librairie n'a pas d'historique persistant des joueurs).
 - Le classement (`computeStandings`) se limite à Buchholz, Buchholz Cut-1, Sonneborn-Berger, rating moyen des adversaires et confrontation directe. Le nombre de victoires (`numberOfWins`) existe aussi, mais comme `buchholzCut1` à l'origine, en fonction autonome non encore câblée dans l'ordre de tri ; d'autres critères FIDE ne sont pas implémentés.
+- Les tournois par équipes classent sur les points de match et les points de partie uniquement (puis rating moyen de l'effectif) : pas encore de départages par équipes (Sonneborn-Berger, Buchholz...), ni de contrôle de l'ordre des échiquiers d'un round à l'autre. La valeur d'un bye (par défaut un match gagné sans points de partie) est un choix de l'application, configurable via `TeamScoring`.
 
 Ce sont de bons points de départ pour une première contribution : voir [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -147,6 +149,36 @@ val playerNewRating = newRating(player.rating, expected, game.pointsFor(player),
 ```
 
 Notez que les objets `Player` créés à l'étape 1 gardent volontairement leur rating de départ pendant tout le tournoi (c'est ce rating qui sert à l'appariement et à l'équilibrage des couleurs) : les nouveaux ratings calculés ici sont à stocker séparément, par exemple dans une `Map<Player, Int>`, exactement comme le fait l'exemple ci-dessous.
+
+### Tournois par équipes
+
+Une `Team` est un effectif dans l'ordre des échiquiers. L'équipe citée en premier dans un appariement joue les blancs aux échiquiers impairs et les noirs aux échiquiers pairs, comme dans la plupart des compétitions par équipes. `TeamScoring(primary = TeamScoreType.GAME_POINTS)` classe sur les points de partie plutôt que sur les points de match.
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.team.Team
+import io.github.riadhmnasri.chesstournament.team.TeamMatch
+import io.github.riadhmnasri.chesstournament.team.TeamRound
+import io.github.riadhmnasri.chesstournament.team.computeTeamStandings
+import io.github.riadhmnasri.chesstournament.team.pairFirstTeamRound
+import io.github.riadhmnasri.chesstournament.team.pairNextTeamRound
+
+val teams = listOf(
+    Team(id = "club-a", name = "Club A", players = players), // les joueurs de l'étape 1
+    // ...
+)
+
+val pairings = pairFirstTeamRound(teams)
+val firstMatch = pairings.pairings.first()
+val boards = firstMatch.boards() // Pairing par échiquier, couleurs déjà attribuées
+
+val round1 = TeamRound(
+    number = 1,
+    matches = listOf(TeamMatch(firstMatch.first, firstMatch.second, games = /* un Game par échiquier */ listOf())),
+    byeTeam = pairings.byeTeam,
+)
+val next = pairNextTeamRound(teams, listOf(round1))
+val standings = computeTeamStandings(teams, listOf(round1))
+```
 
 ### Exemple complet
 

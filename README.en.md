@@ -20,6 +20,7 @@ There are good JVM libraries for PGN/FEN parsing and legal move generation (for 
 - **Elo rating calculation**: expected score, rating update, and a simplified K-factor rule inspired by the FIDE table.
 - **Tournament performance rating (TPR)**: the rating an actual score against the real opponents faced would be worth, computed exactly via binary search (not the traditional "dp lookup table" approximation).
 - **Final standings**: score, then Buchholz, Buchholz Cut-1, Sonneborn-Berger, average rating of opponents and direct encounter (within a group that forms a complete mini round-robin) tie-breaks, always in a deterministic order.
+- **Team tournaments** (`team` package): Swiss pairing of fixed-roster teams (never the same two teams twice), alternating colors board by board, scoring by match points (2/1/0) or game points (sum of board results), and team standings.
 
 ## What the library does not do (yet)
 
@@ -29,6 +30,7 @@ This library implements a **pragmatic subset** of the official FIDE Dutch system
 - Accelerated pairings exist but remain optional and opt-in (`pairNextRound(..., virtualPointsByPlayer = ...)`), with two schedules provided as helpers: `acceleratedVirtualPoints` (simplified, fixed top/bottom split) and `bakuAcceleratedVirtualPoints` (FIDE's official Baku algorithm, [FIDE Handbook C.04.7](https://handbook.fide.com/chapter/C0407202602), which depends on group size and round count).
 - The Elo K-factor is a simplified rule (junior / standard / top player, including for life once 2400 is reached / new player by rated game count), not the full FIDE table (no variation by federation, and the lifetime flag must be tracked and passed in by the caller — this library has no persistent player history).
 - Standings (`computeStandings`) are limited to Buchholz, Buchholz Cut-1, Sonneborn-Berger, average rating of opponents and direct encounter. Number of wins (`numberOfWins`) exists too, but like `buchholzCut1` originally, as a standalone function not yet wired into the sort order; other FIDE criteria are not implemented.
+- Team tournaments rank on match points and game points only (then average roster rating): no team-level tie-breaks yet (Sonneborn-Berger, Buchholz...), and board order is not checked from one round to the next. What a bye is worth (a won match with no game points by default) is an app-defined choice, configurable via `TeamScoring`.
 
 These are good starting points for a first contribution, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -147,6 +149,36 @@ val playerNewRating = newRating(player.rating, expected, game.pointsFor(player),
 ```
 
 Note that the `Player` objects created in step 1 deliberately keep their starting rating for the whole tournament (that rating is what drives pairing and color balancing): the new ratings computed here should be stored separately, for example in a `Map<Player, Int>`, exactly like the example below does.
+
+### Team tournaments
+
+A `Team` is a roster in board order. The team listed first in a pairing plays white on odd boards and black on even boards, as in most team competitions. `TeamScoring(primary = TeamScoreType.GAME_POINTS)` ranks on game points instead of match points.
+
+```kotlin
+import io.github.riadhmnasri.chesstournament.team.Team
+import io.github.riadhmnasri.chesstournament.team.TeamMatch
+import io.github.riadhmnasri.chesstournament.team.TeamRound
+import io.github.riadhmnasri.chesstournament.team.computeTeamStandings
+import io.github.riadhmnasri.chesstournament.team.pairFirstTeamRound
+import io.github.riadhmnasri.chesstournament.team.pairNextTeamRound
+
+val teams = listOf(
+    Team(id = "club-a", name = "Club A", players = players), // the players from step 1
+    // ...
+)
+
+val pairings = pairFirstTeamRound(teams)
+val firstMatch = pairings.pairings.first()
+val boards = firstMatch.boards() // one Pairing per board, colors already assigned
+
+val round1 = TeamRound(
+    number = 1,
+    matches = listOf(TeamMatch(firstMatch.first, firstMatch.second, games = /* one Game per board */ listOf())),
+    byeTeam = pairings.byeTeam,
+)
+val next = pairNextTeamRound(teams, listOf(round1))
+val standings = computeTeamStandings(teams, listOf(round1))
+```
 
 ### Full example
 

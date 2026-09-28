@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Team tournaments, in a new `team` package: `Team` (a roster in board order), `TeamMatch`/`TeamRound` (board games aggregated into match points 2/1/0 and game points), `pairFirstTeamRound`/`pairNextTeamRound` (team Swiss pairing that never repeats a team-vs-team match unless unavoidable, with the team listed first playing white on odd boards via `TeamPairing.boards`), and `computeTeamStandings`, ranking on `TeamScoring.primary` (match or game points), then the other score. The value of a bye is configurable. The greedy pairing and bye selection used by `pairNextRound` were extracted into generic internal helpers shared by both engines, with no behavior change.
 - `numberOfWins`, counting each player's decisive game wins across rounds (draws, losses and byes excluded). Standalone, not yet wired into `computeStandings`/`Standing`; call it directly.
 - `bakuAcceleratedVirtualPoints`, implementing FIDE's official Baku Acceleration algorithm ([FIDE Handbook C.04.7](https://handbook.fide.com/chapter/C0407202602)) as an alternative to the simplified `acceleratedVirtualPoints`: GA (the top `2 * ceil(N/4)` rated players) gets a full virtual point for the first half (rounded up) of the accelerated rounds (`ceil(totalRounds/2)` of them), then half a point for the rest, then none; GB never gets virtual points.
 - `Standing` gains a `buchholzCut1` field, now wired into `computeStandings`' tie-break order right after plain Buchholz.

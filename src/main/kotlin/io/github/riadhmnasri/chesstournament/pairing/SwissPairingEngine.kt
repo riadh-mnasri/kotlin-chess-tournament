@@ -83,20 +83,13 @@ fun pairNextRound(
             .sortedByDescending { standing -> standing.score + (virtualPointsByPlayer[standing.player] ?: 0.0) }
             .map { it.player }
     val byePlayer = selectByePlayer(rankedPlayers, previousRounds)
-    val remainingPlayers = rankedPlayers.filterNot { it == byePlayer }.toMutableList()
-
-    val pairings = mutableListOf<Pairing>()
-    while (remainingPlayers.isNotEmpty()) {
-        val topPlayer = remainingPlayers.removeAt(0)
-        val opponentIndex =
-            remainingPlayers
-                .indexOfFirst { candidate -> !havePlayed(topPlayer, candidate, previousRounds) }
-                .takeIf { it >= 0 } ?: 0
-        val opponent = remainingPlayers.removeAt(opponentIndex)
-
-        val (white, black) = allocateColors(topPlayer, opponent, previousRounds)
-        pairings.add(Pairing(white = white, black = black))
-    }
+    val pairings =
+        pairGreedily(rankedPlayers.filterNot { it == byePlayer }) { playerA, playerB ->
+            havePlayed(playerA, playerB, previousRounds)
+        }.map { (topPlayer, opponent) ->
+            val (white, black) = allocateColors(topPlayer, opponent, previousRounds)
+            Pairing(white = white, black = black)
+        }
 
     return RoundPairings(pairings = pairings, byePlayer = byePlayer)
 }

@@ -18,13 +18,7 @@ import io.github.riadhmnasri.chesstournament.model.Round
 internal fun selectByePlayer(
     rankedPlayers: List<Player>,
     previousRounds: List<Round>,
-): Player? {
-    if (rankedPlayers.size % 2 == 0) return null
-
-    val playersWithoutAPriorBye =
-        rankedPlayers.filter { player ->
-            previousRounds.none { round -> round.byePlayer == player }
-        }
-
-    return playersWithoutAPriorBye.ifEmpty { rankedPlayers }.last()
-}
+): Player? =
+    selectBye(rankedPlayers) { player ->
+        previousRounds.any { round -> round.byePlayer == player }
+    }
